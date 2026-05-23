@@ -1,5 +1,5 @@
 PacletObject[<|
-  "Name" -> "WolframInstitute/Z3",
+  "Name" -> "WolframInstitute/Z3Link",
   "Description" -> "Bindings to the Z3 theorem prover / SMT solver. Enter problems as native Wolfram Language expressions or as SMT-LIB2, with exact symbolic translation of results.",
   "Creator" -> "Richard Assar",
   "Publisher" -> "Wolfram Institute",
@@ -9,7 +9,7 @@ PacletObject[<|
   "Keywords" -> {"Z3", "SMT", "solver", "theorem prover", "satisfiability", "SMT-LIB", "constraints"},
   "Categories" -> {"Mathematics", "Logic"},
   "Extensions" -> {
-    {"Kernel", "Root" -> "Kernel", "Context" -> "WolframInstitute`Z3`"},
-    {"Documentation", "Language" -> "English", "MainPage" -> "Tutorials/Z3"}
+    {"Kernel", "Root" -> "Kernel", "Context" -> "WolframInstitute`Z3Link`"},
+    {"Documentation", "Language" -> "English", "MainPage" -> "Tutorials/Z3Link"}
   }
 |>]

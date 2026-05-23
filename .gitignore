@@ -2,4 +2,4 @@
 *.paclet
 
 # Generated documentation notebooks — source of truth is docs/*.md; regenerate with build.wls.
-/Z3/Documentation/English/Tutorials/*.nb
+/Z3Link/Documentation/English/Tutorials/*.nb

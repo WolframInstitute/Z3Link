@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* WolframInstitute/Z3 -- Wolfram Language bindings to the Z3 SMT solver.
+(* WolframInstitute/Z3Link -- Wolfram Language bindings to the Z3 SMT solver.
    Copyright (C) 2026 Richard Assar.
 
    This program is free software: you can redistribute it and/or modify it under
@@ -9,7 +9,7 @@
    version. This program is distributed WITHOUT ANY WARRANTY. See the GNU General
    Public License (LICENSE file) for more details. *)
 
-BeginPackage["WolframInstitute`Z3`"];
+BeginPackage["WolframInstitute`Z3Link`"];
 
 (* ---- High-level solving ---- *)
 

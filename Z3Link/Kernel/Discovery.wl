@@ -42,7 +42,7 @@ z3ExecutableName[] := Last[z3PlatformInfo[]] /. {_?FailureQ -> "z3", x_ :> x};
 
 (* paclet-private data directory for downloaded z3 installs *)
 z3DataDirectory[] := Module[{dir},
-  dir = FileNameJoin[{$UserBaseDirectory, "ApplicationData", "WolframInstitute", "Z3"}];
+  dir = FileNameJoin[{$UserBaseDirectory, "ApplicationData", "WolframInstitute", "Z3Link"}];
   If[! DirectoryQ[dir], Quiet@CreateDirectory[dir, CreateIntermediateDirectories -> True]];
   dir
 ];

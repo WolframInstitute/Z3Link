@@ -1,4 +1,4 @@
-# WolframInstitute/Z3
+# WolframInstitute/Z3Link
 
 Bindings to the **Z3 theorem prover** (an SMT solver from Microsoft Research) for the Wolfram Language. Enter problems as native Wolfram expressions *or* as SMT-LIB2, and get results translated back into exact Wolfram values (integers, rationals, algebraic numbers, booleans, bit-vectors, functions).
 
@@ -7,7 +7,7 @@ Bindings to the **Z3 theorem prover** (an SMT solver from Microsoft Research) fo
 The paclet drives the `z3` command-line solver. It looks for `z3` in this order: an executable you set explicitly, the `Z3_PATH` environment variable, your system `PATH`, common install locations, a previously downloaded copy, and finally it **downloads a private copy of z3 automatically** (once) if none is found. So nothing needs to be installed by hand.
 
 ```wl
-Needs["WolframInstitute`Z3`"]
+Needs["WolframInstitute`Z3Link`"]
 Z3InstallationLocation[]
 ```
 

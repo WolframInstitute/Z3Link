@@ -1,7 +1,7 @@
-(* Verification tests for WolframInstitute/Z3.
+(* Verification tests for WolframInstitute/Z3Link.
    Run with the runner: tools/run_tests.wls (loads the paclet, then TestReport). *)
 
-BeginTestSection["Z3"];
+BeginTestSection["Z3Link"];
 
 (* ---- translation (no solver needed) ---- *)
 
@@ -219,20 +219,20 @@ VerificationTest[Z3SetExecutable["/no/such/z3-binary"], $Failed,
 (* ---- MOCK: cross-platform discovery + download-URL resolution, exercised on
    every OS without any network/download (the Linux/macOS paths we cannot run live) ---- *)
 
-VerificationTest[WolframInstitute`Z3`Private`z3PlatformInfo["Linux-x86-64"], {"x64-glibc", "z3"}, TestID -> "mock-platform-linux"];
-VerificationTest[WolframInstitute`Z3`Private`z3PlatformInfo["Linux-ARM64"], {"arm64-glibc", "z3"}, TestID -> "mock-platform-linux-arm"];
-VerificationTest[WolframInstitute`Z3`Private`z3PlatformInfo["MacOSX-ARM64"], {"arm64-osx", "z3"}, TestID -> "mock-platform-macos"];
-VerificationTest[WolframInstitute`Z3`Private`z3PlatformInfo["Windows-ARM64"], {"arm64-win", "z3.exe"}, TestID -> "mock-platform-winarm"];
-VerificationTest[WolframInstitute`Z3`Private`z3PlatformInfo["Plan9-x86"], $Failed, TestID -> "mock-platform-unknown"];
+VerificationTest[WolframInstitute`Z3Link`Private`z3PlatformInfo["Linux-x86-64"], {"x64-glibc", "z3"}, TestID -> "mock-platform-linux"];
+VerificationTest[WolframInstitute`Z3Link`Private`z3PlatformInfo["Linux-ARM64"], {"arm64-glibc", "z3"}, TestID -> "mock-platform-linux-arm"];
+VerificationTest[WolframInstitute`Z3Link`Private`z3PlatformInfo["MacOSX-ARM64"], {"arm64-osx", "z3"}, TestID -> "mock-platform-macos"];
+VerificationTest[WolframInstitute`Z3Link`Private`z3PlatformInfo["Windows-ARM64"], {"arm64-win", "z3.exe"}, TestID -> "mock-platform-winarm"];
+VerificationTest[WolframInstitute`Z3Link`Private`z3PlatformInfo["Plan9-x86"], $Failed, TestID -> "mock-platform-unknown"];
 
-VerificationTest[WolframInstitute`Z3`Private`z3AssetURL["4.16.0", "Linux-x86-64"],
+VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "Linux-x86-64"],
   "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3-4.16.0-x64-glibc-2.39.zip", TestID -> "mock-url-linux"];
-VerificationTest[WolframInstitute`Z3`Private`z3AssetURL["4.16.0", "MacOSX-ARM64"],
+VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "MacOSX-ARM64"],
   "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3-4.16.0-arm64-osx-15.7.3.zip", TestID -> "mock-url-macos"];
-VerificationTest[WolframInstitute`Z3`Private`z3AssetURL["4.16.0", "MacOSX-x86-64"],
+VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "MacOSX-x86-64"],
   "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3-4.16.0-x64-osx-15.7.3.zip", TestID -> "mock-url-macos-x64"];
-VerificationTest[WolframInstitute`Z3`Private`z3AssetURL["4.16.0", "Windows-x86-64"],
+VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "Windows-x86-64"],
   "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3-4.16.0-x64-win.zip", TestID -> "mock-url-win"];
-VerificationTest[WolframInstitute`Z3`Private`z3AssetURL["4.16.0", "Plan9-x86"], $Failed, TestID -> "mock-url-unknown"];
+VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "Plan9-x86"], $Failed, TestID -> "mock-url-unknown"];
 
 EndTestSection[];

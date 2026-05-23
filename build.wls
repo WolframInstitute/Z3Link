@@ -4,7 +4,7 @@
    Run:  wolframscript -file build.wls   *)
 
 root = DirectoryName[$InputFileName];
-pacletDir = FileNameJoin[{root, "Z3"}];
+pacletDir = FileNameJoin[{root, "Z3Link"}];
 
 (* 1. markdown -> notebooks *)
 Get[FileNameJoin[{root, "tools", "md2nb.wls"}]];

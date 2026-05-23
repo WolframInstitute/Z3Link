@@ -1,4 +1,4 @@
-# WolframInstitute/Z3
+# WolframInstitute/Z3Link
 
 Wolfram Language bindings to the [Z3 theorem prover](https://github.com/Z3Prover/z3), an SMT (Satisfiability Modulo Theories) solver from Microsoft Research.
 
@@ -22,15 +22,15 @@ You enter problems as **native Wolfram expressions** or as **SMT-LIB2**, and res
 ### From the built paclet archive
 
 ```wl
-PacletInstall["WolframInstitute__Z3-0.1.0.paclet"]
-Needs["WolframInstitute`Z3`"]
+PacletInstall["WolframInstitute__Z3Link-0.1.0.paclet"]
+Needs["WolframInstitute`Z3Link`"]
 ```
 
 ### From source (development)
 
 ```wl
-PacletDirectoryLoad["/path/to/z3_paclet/Z3"]
-Needs["WolframInstitute`Z3`"]
+PacletDirectoryLoad["/path/to/z3_paclet/Z3Link"]
+Needs["WolframInstitute`Z3Link`"]
 ```
 
 ### Building the paclet and docs from source
@@ -38,7 +38,7 @@ Needs["WolframInstitute`Z3`"]
 From the repository root:
 
 ```bash
-wolframscript -file build.wls       # docs/*.md -> notebooks, then packs WolframInstitute__Z3-*.paclet
+wolframscript -file build.wls       # docs/*.md -> notebooks, then packs WolframInstitute__Z3Link-*.paclet
 wolframscript -file tools/run_tests.wls   # installs the built paclet and runs the test suite
 ```
 
@@ -67,7 +67,7 @@ The download is cross-platform: it detects `$SystemID` and selects the matching 
 ## Quick start
 
 ```wl
-Needs["WolframInstitute`Z3`"]
+Needs["WolframInstitute`Z3Link`"]
 
 Z3Solve[x > 2 && y < 10 && x + 2 y == 7, {x, y} \[Element] Integers]
 (*  <| x -> 7, y -> 0 |>  *)
@@ -250,7 +250,7 @@ The bindings are pure Wolfram + the `z3` executable, so they run anywhere a Wolf
 wolframscript -file tools/run_tests.wls
 ```
 
-This installs the built `.paclet` and runs `Z3/Tests/Tests.wlt` (translation, all theories, incremental solving, optimization, SMT-LIB interop).
+This installs the built `.paclet` and runs `Z3Link/Tests/Tests.wlt` (translation, all theories, incremental solving, optimization, SMT-LIB interop).
 
 ---
 

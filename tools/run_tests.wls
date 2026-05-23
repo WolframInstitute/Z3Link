@@ -8,10 +8,10 @@ If[pacletFile === $Failed, Print["No .paclet found; run build.wls first."]; Exit
 
 Print["Installing ", FileNameTake[pacletFile], " ..."];
 PacletInstall[pacletFile, ForceVersionInstall -> True];
-Needs["WolframInstitute`Z3`"];
+Needs["WolframInstitute`Z3Link`"];
 Print["z3 version: ", Z3Version[]];
 
-report = TestReport[FileNameJoin[{root, "Z3", "Tests", "Tests.wlt"}]];
+report = TestReport[FileNameJoin[{root, "Z3Link", "Tests", "Tests.wlt"}]];
 results = Values[report["TestResults"]];
 Print["\n--- results ---"];
 Scan[Print["  ", #["Outcome"], "  ", #["TestID"]] &, results];
