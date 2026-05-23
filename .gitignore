@@ -1,0 +1,5 @@
+# Built paclet archive — published as a GitHub release, not tracked.
+*.paclet
+
+# Generated documentation notebooks — source of truth is docs/*.md; regenerate with build.wls.
+/Z3/Documentation/English/Tutorials/*.nb
