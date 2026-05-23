@@ -51,7 +51,7 @@ On first use the paclet resolves a working `z3` executable in this order:
 1. An executable set explicitly via `Z3SetExecutable["..."]`.
 2. The system `PATH` (and common locations such as `/usr/bin`, `/usr/local/bin`, `/opt/homebrew/bin`).
 3. A copy previously downloaded by the paclet.
-4. **Automatic download** — the correct Z3 release for your platform (Windows / Linux / macOS, x86-64 / arm64) is fetched from the official GitHub releases, verified, and cached under `$UserBaseDirectory`. This happens **on every platform** as a guaranteed fallback, with a one-time progress message.
+4. **Automatic download** — the correct Z3 release for your platform (Windows / Linux / macOS, x86-64 / arm64) is fetched over HTTPS from the official GitHub releases, then verified by actually running it (`z3 --version`), and cached under `$UserBaseDirectory`. This happens **on every platform** as a guaranteed fallback, with a one-time progress message. On Unix the executable bit is set after extraction; on macOS the quarantine attribute is cleared and the binary + `libz3.dylib` are ad-hoc code-signed (`codesign -s -`) so Apple Silicon will run them. If anything fails, a specific diagnostic message points you to `Z3SetExecutable["..."]`.
 
 ```wl
 Z3InstallationLocation[]   (* resolve (and download if needed) the z3 path *)
@@ -228,7 +228,9 @@ Kernel sources:
 
 ## Cross-platform notes
 
-The bindings are pure Wolfram + the `z3` executable, so they run anywhere a Wolfram kernel and z3 run: **Windows, Linux, macOS, and WSL**. The kernel and z3 must be the same OS (e.g. a Windows kernel uses a Windows z3); the auto-downloader always fetches the matching build, so this is handled for you. The paclet detects `$SystemID == "Windows-x86-64"`, `"Linux-x86-64"`, `"MacOSX-ARM64"`, etc. and behaves accordingly.
+The bindings are pure Wolfram + the `z3` executable, so they run anywhere a Wolfram kernel and z3 run: **Windows, Linux, macOS, and WSL**. The kernel and z3 must be the same OS (e.g. a Windows kernel uses a Windows z3); the auto-downloader always fetches the matching build, so this is handled for you. The paclet detects `$SystemID` (`Windows-x86-64`, `Windows-ARM64`, `Linux-x86-64`, `Linux-ARM64`, `MacOSX-x86-64`, `MacOSX-ARM64`) and behaves accordingly. The exact per-platform download URLs are pinned to verified release-asset names (so resolution doesn't depend on the GitHub API), and on macOS the downloaded binary is automatically un-quarantined and ad-hoc code-signed so Apple Silicon will run it.
+
+> Note on testing: this paclet's automated suite has been exercised on Windows (x86-64). The Linux and macOS code paths — system discovery, the per-platform download, and the macOS permission/signing steps — are written from verified release-asset URLs and documented platform behavior, but have not been executed on those OSes here. On any failure they emit a specific, actionable message (pointing to `Z3SetExecutable[...]`) rather than failing silently.
 
 ---
 

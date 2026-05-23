@@ -5,6 +5,25 @@
 
 $Z3DefaultVersion = "4.16.0";
 
+(* Verified GitHub release asset filenames for the pinned version (HEAD-checked).
+   Used as the primary, network-independent way to resolve the download URL, so
+   Linux/macOS do not rely on the GitHub API to guess the varying glibc/osx suffix. *)
+$Z3KnownAssets = <|
+  "4.16.0" -> <|
+    "x64-win" -> "z3-4.16.0-x64-win.zip",
+    "arm64-win" -> "z3-4.16.0-arm64-win.zip",
+    "x64-glibc" -> "z3-4.16.0-x64-glibc-2.39.zip",
+    "arm64-glibc" -> "z3-4.16.0-arm64-glibc-2.38.zip",
+    "x64-osx" -> "z3-4.16.0-x64-osx-15.7.3.zip",
+    "arm64-osx" -> "z3-4.16.0-arm64-osx-15.7.3.zip"
+  |>
+|>;
+
+Z3Install::platform = "Unsupported platform `1`. Install z3 and put it on PATH, or set it explicitly with Z3SetExecutable[\"...\"].";
+Z3Install::download = "Failed to download z3 from `1`. Check your internet connection, or set a z3 executable manually with Z3SetExecutable[\"...\"].";
+Z3Install::extract  = "Failed to extract the z3 archive at `1`.";
+Z3Install::notfound = "z3 was downloaded to `1` but no working executable could be run (it may be blocked by the OS or missing dependencies). Install z3 manually and use Z3SetExecutable[\"...\"].";
+
 (* Map $SystemID to {assetSubstring, executableName}. assetSubstring matches the
    github release zip name (suffixes like glibc/osx versions vary, so we match a substring). *)
 z3PlatformInfo[] := Switch[$SystemID,
@@ -57,20 +76,22 @@ findDownloadedZ3[] := Module[{name = z3ExecutableName[], hits},
   SelectFirst[hits, z3WorksQ, $Failed]
 ];
 
-(* resolve the github asset download url for a version + this platform *)
-z3AssetURL[version_String] := Module[{sub = First[z3PlatformInfo[]], api, assets, match},
+(* resolve the github asset download url for a version + this platform.
+   1) verified hardcoded name for the pinned version; 2) GitHub API (arbitrary
+   versions / varying suffixes); 3) last-resort constructed url. *)
+z3AssetURL[version_String] := Module[{sub, known, api, assets, match},
+  If[z3PlatformInfo[] === $Failed, Return[$Failed]];
+  sub = First[z3PlatformInfo[]];
+  known = Lookup[Lookup[$Z3KnownAssets, version, <||>], sub, Missing[]];
+  If[StringQ[known],
+    Return["https://github.com/Z3Prover/z3/releases/download/z3-" <> version <> "/" <> known]];
   api = "https://api.github.com/repos/Z3Prover/z3/releases/tags/z3-" <> version;
-  assets = Quiet@Check[
-    Lookup[Import[api, "RawJSON"], "assets", {}],
-    {}
-  ];
+  assets = Quiet@Check[Lookup[Import[api, "RawJSON"], "assets", {}], {}];
   match = SelectFirst[assets,
     StringContainsQ[Lookup[#, "name", ""], sub] && StringEndsQ[Lookup[#, "name", ""], ".zip"] &,
-    $Failed
-  ];
+    $Failed];
   If[AssociationQ[match],
     Lookup[match, "browser_download_url"],
-    (* fallback: best-effort constructed url (works when suffix-free, e.g. win) *)
     "https://github.com/Z3Prover/z3/releases/download/z3-" <> version <>
       "/z3-" <> version <> "-" <> sub <> ".zip"
   ]
@@ -79,8 +100,9 @@ z3AssetURL[version_String] := Module[{sub = First[z3PlatformInfo[]], api, assets
 (* download + extract z3, returning the path to the executable *)
 downloadZ3[version_String] := Module[
   {url, zip, extractDir, name = z3ExecutableName[], hits, exe},
+  If[z3PlatformInfo[] === $Failed, Message[Z3Install::platform, $SystemID]; Return[$Failed]];
   url = z3AssetURL[version];
-  If[! StringQ[url], Return[$Failed]];
+  If[! StringQ[url], Message[Z3Install::platform, $SystemID]; Return[$Failed]];
 
   printZ3[Style["Z3 was not found on your system.", Bold],
     "\nDownloading Z3 " <> version <> " for " <> $SystemID <> " (one-time setup)..."];
@@ -91,20 +113,34 @@ downloadZ3[version_String] := Module[
   zip = FileNameJoin[{z3DataDirectory[], "z3-download.zip"}];
   Quiet@DeleteFile[zip];
 
-  If[FailureQ@downloadWithProgress[url, zip], Return[$Failed]];
+  If[FailureQ@downloadWithProgress[url, zip],
+    Message[Z3Install::download, url]; Return[$Failed]];
 
   printZ3["Extracting..."];
-  Quiet@Check[ExtractArchive[zip, extractDir], Return[$Failed]];
+  If[FailureQ@Quiet@Check[ExtractArchive[zip, extractDir], $Failed],
+    Message[Z3Install::extract, zip]; Return[$Failed]];
   Quiet@DeleteFile[zip];
 
   hits = FileNames[name, extractDir, Infinity];
+  (* Make the binary runnable BEFORE testing it. ExtractArchive does not document
+     preserving the Unix +x bit, so set it explicitly. On macOS also clear the
+     quarantine xattr (Gatekeeper assesses exec/posix_spawn on quarantined files
+     since Catalina) and ad-hoc re-sign the executable AND libz3.dylib, since Apple
+     Silicon refuses to run unsigned/linker-only binaries with a bare "Killed: 9".
+     All best-effort: if a tool is absent the z3WorksQ check below still gives a
+     clear diagnostic. *)
+  If[$OperatingSystem =!= "Windows",
+    Scan[Quiet@Run["chmod +x \"" <> # <> "\""] &, hits]];
+  If[$OperatingSystem === "MacOSX",
+    Quiet@Run["xattr -dr com.apple.quarantine \"" <> extractDir <> "\""];
+    Scan[Quiet@Run["codesign -s - -f \"" <> # <> "\""] &,
+      FileNames[{name, "*.dylib"}, extractDir, Infinity]]];
+
   exe = SelectFirst[hits, z3WorksQ, $Failed];
   If[StringQ[exe],
-    (* ensure executable bit on unix *)
-    If[$OperatingSystem =!= "Windows", Quiet@Run["chmod +x " <> "\"" <> exe <> "\""]];
-    printZ3[Style["Z3 " <> version <> " installed.", Bold]];
-  ];
-  exe
+    printZ3[Style["Z3 " <> version <> " installed.", Bold]]; exe,
+    (Message[Z3Install::notfound, extractDir]; $Failed)
+  ]
 ];
 
 (* progress-reporting download that works headless or in a notebook *)
