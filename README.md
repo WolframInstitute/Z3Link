@@ -178,7 +178,17 @@ Z3CheckSat[o]; Z3Model[o]
 - `"Numeric" -> True` — machine-precision numbers instead of exact.
 - `"Options" -> {"name" -> value, ...}` — arbitrary z3 options.
 
-`Z3SetOption[solver, "name" -> value]` sets any z3 option on a live solver; `Z3SetOption["name" -> value]` sets it on the shared default session.
+`Z3SetOption[solver, "name" -> value]` sets any z3 option on a live solver; `Z3SetOption["name" -> value]` sets a global default applied to every subsequent solve.
+
+## Full coverage / advanced features
+
+The wrapped functions cover the common workflow, and three escape hatches reach **everything else z3 can do** — no feature is locked out:
+
+- **Any z3 option** → `Z3SetOption[...]` or the `"Options"` option (e.g. random seeds, `:smt.arith.solver`, `:sat.restart`, model/proof production).
+- **Any SMT operator** → `Z3Op["op", args...]` builds an arbitrary SMT-LIB term (e.g. `Z3Op["bvashr", a, b]`, `Z3Op["str.++", s, t]`, `Z3Op["re.union", r1, r2]`).
+- **Any z3 command** → `Z3RunSMTLIB["..."]` runs raw SMT-LIB2, which exposes tactics (`(check-sat-using (then simplify smt))`), proofs (`(get-proof)`), soft constraints / MaxSAT (`(assert-soft ...)`), interpolation, datatypes, `(simplify ...)`, and the full optimization command set.
+
+So the native and handle APIs are conveniences over the same surface; the raw path guarantees parity with the `z3` binary itself.
 
 ---
 

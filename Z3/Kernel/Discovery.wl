@@ -25,8 +25,10 @@ Z3Install::extract  = "Failed to extract the z3 archive at `1`.";
 Z3Install::notfound = "z3 was downloaded to `1` but no working executable could be run (it may be blocked by the OS or missing dependencies). Install z3 manually and use Z3SetExecutable[\"...\"].";
 
 (* Map $SystemID to {assetSubstring, executableName}. assetSubstring matches the
-   github release zip name (suffixes like glibc/osx versions vary, so we match a substring). *)
-z3PlatformInfo[] := Switch[$SystemID,
+   github release zip name (suffixes like glibc/osx versions vary, so we match a substring).
+   The explicit-sysid overload exists so the cross-platform logic can be unit-tested. *)
+z3PlatformInfo[] := z3PlatformInfo[$SystemID];
+z3PlatformInfo[sysid_String] := Switch[sysid,
   "Windows-x86-64", {"x64-win", "z3.exe"},
   "Windows-ARM64",  {"arm64-win", "z3.exe"},
   "Linux-x86-64",   {"x64-glibc", "z3"},
@@ -79,9 +81,10 @@ findDownloadedZ3[] := Module[{name = z3ExecutableName[], hits},
 (* resolve the github asset download url for a version + this platform.
    1) verified hardcoded name for the pinned version; 2) GitHub API (arbitrary
    versions / varying suffixes); 3) last-resort constructed url. *)
-z3AssetURL[version_String] := Module[{sub, known, api, assets, match},
-  If[z3PlatformInfo[] === $Failed, Return[$Failed]];
-  sub = First[z3PlatformInfo[]];
+z3AssetURL[version_String] := z3AssetURL[version, $SystemID];
+z3AssetURL[version_String, sysid_String] := Module[{sub, known, api, assets, match},
+  If[z3PlatformInfo[sysid] === $Failed, Return[$Failed]];
+  sub = First[z3PlatformInfo[sysid]];
   known = Lookup[Lookup[$Z3KnownAssets, version, <||>], sub, Missing[]];
   If[StringQ[known],
     Return["https://github.com/Z3Prover/z3/releases/download/z3-" <> version <> "/" <> known]];

@@ -8,6 +8,7 @@ $Z3SessionCounter = 0;
 $Z3Sessions = <||>;            (* id -> <|"Process"->proc, "Counter"->n, ...|> *)
 $Z3DefaultSession = None;
 $Z3ReadTimeout = 300;          (* seconds; backstop so a hung read cannot wedge the kernel *)
+$Z3GlobalOptions = {};         (* z3 options applied to every new session (Z3SetOption[opts]) *)
 
 z3SessionStart[] := Module[{exe, proc, id},
   exe = z3Executable[];
@@ -18,6 +19,8 @@ z3SessionStart[] := Module[{exe, proc, id},
   $Z3Sessions[id] = <|"Process" -> proc, "Sentinel" -> 0|>;
   (* harmless baseline options *)
   z3RawSend[id, "(set-option :print-success false)\n(set-option :produce-models true)"];
+  (* user-set global options (Z3SetOption[opts]) apply to every new session *)
+  If[$Z3GlobalOptions =!= {}, z3RawSend[id, optionCommands[$Z3GlobalOptions]]];
   id
 ];
 
@@ -49,8 +52,10 @@ z3RawSend[id_, cmds_String] := Module[{proc, sentinel, lines, line, done},
     "TIMEOUT"
   ];
   Which[
-    done === "EOF", $Failed,
-    done === "TIMEOUT", (Message[Z3CheckSat::timeout]; $Failed),
+    (* a dead or wedged process is killed+dropped so the next call restarts cleanly
+       instead of reading stale, desynced output *)
+    done === "EOF", (z3SessionEnd[id]; $Failed),
+    done === "TIMEOUT", (Message[Z3CheckSat::timeout]; z3SessionEnd[id]; $Failed),
     True, StringRiffle[lines, "\n"]
   ]
 ];

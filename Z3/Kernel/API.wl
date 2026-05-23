@@ -131,9 +131,8 @@ Z3UnsatCore[Z3SolverObject[id_]] := Module[{forms, names, coreMap},
 
 Z3Statistics[Z3SolverObject[id_]] := parseStatistics[z3Send[id, "(get-info :all-statistics)"]];
 
-Z3CheckSat[Z3SolverObject[id_], assumptions_ : None] := Module[{cmd, status},
-  cmd = "(check-sat)";
-  status = statusFromForms[z3Send[id, cmd]];
+Z3CheckSat[Z3SolverObject[id_]] := Module[{status},
+  status = statusFromForms[z3Send[id, "(check-sat)"]];
   status /. Missing[] -> "unknown"
 ];
 
@@ -156,7 +155,12 @@ Z3Reset[s : Z3SolverObject[id_]] := (
 
 Z3SetOption[s : Z3SolverObject[id_], opts__Rule] := (
   z3RawSend[id, optionCommands[{opts}]]; s);
-Z3SetOption[opts__Rule] := (z3RawSend[z3DefaultSession[], optionCommands[{opts}]];);
+(* global: remember for every future session AND apply to the live default session *)
+Z3SetOption[opts__Rule] := (
+  $Z3GlobalOptions = DeleteDuplicatesBy[Join[{opts}, $Z3GlobalOptions], First];
+  If[$Z3DefaultSession =!= None && z3SessionAliveQ[$Z3DefaultSession],
+    z3RawSend[$Z3DefaultSession, optionCommands[{opts}]]];
+  $Z3GlobalOptions);
 
 (* close + free a solver's process *)
 Z3SolverObject /: DeleteObject[Z3SolverObject[id_]] := z3SessionEnd[id];
