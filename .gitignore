@@ -1,5 +1,6 @@
-# Built paclet archive — published as a GitHub release, not tracked.
+# Built paclet archive - published as a GitHub release, not tracked.
 *.paclet
+Z3Link/build
 
-# Generated documentation notebooks — source of truth is docs/*.md; regenerate with build.wls.
-/Z3Link/Documentation/English/Tutorials/*.nb
+# Generated documentation notebooks - source of truth is docs/*.md; regenerate with build.wls.
+*.nb
