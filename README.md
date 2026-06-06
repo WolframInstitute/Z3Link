@@ -2,27 +2,37 @@
 
 Wolfram Language bindings to the [Z3 theorem prover](https://github.com/Z3Prover/z3), an SMT (Satisfiability Modulo Theories) solver from Microsoft Research.
 
-You enter problems as **native Wolfram expressions** or as **SMT-LIB2**, and results are translated back into **exact Wolfram values** — integers, rationals, algebraic numbers (`Root`/`Sqrt`), booleans, bit-vectors, arrays and functions.
+You enter problems as **native Wolfram expressions** or as **SMT-LIB2**, and results are translated back into **exact Wolfram values** - integers, rationals, algebraic numbers (`Root`/`Sqrt`), booleans, bit-vectors, arrays and functions.
 
 - **Author:** Richard Assar
 - **Publisher:** Wolfram Institute
 - **License:** GNU GPL v3 or later (the paclet). Z3 itself is MIT-licensed by Microsoft.
+- **Paclet Repository:** [WolframInstitute/Z3Link](https://www.wolframcloud.com/obj/resourcesystem/published/PacletRepository/resources/WolframInstitute/Z3Link/)
 
 ---
 
 ## Requirements
 
 - Wolfram Language 13.0+ (developed and tested on 14.3).
-- The `z3` command-line solver. **You do not need to install it yourself** — if no system z3 is found, the paclet downloads a private copy automatically on first use (see below).
+- The `z3` command-line solver. **You do not need to install it yourself** - if no system z3 is found, the paclet downloads a private copy automatically on first use (see below).
 
 ---
 
 ## Installation
 
+### From the Paclet Repository
+
+The paclet is published in the [Wolfram Paclet Repository](https://www.wolframcloud.com/obj/resourcesystem/published/PacletRepository/resources/WolframInstitute/Z3Link/):
+
+```wl
+PacletInstall["WolframInstitute/Z3Link"]
+Needs["WolframInstitute`Z3Link`"]
+```
+
 ### From the built paclet archive
 
 ```wl
-PacletInstall["WolframInstitute__Z3Link-0.1.0.paclet"]
+PacletInstall["WolframInstitute__Z3Link-1.0.0.paclet"]
 Needs["WolframInstitute`Z3Link`"]
 ```
 
@@ -38,9 +48,17 @@ Needs["WolframInstitute`Z3Link`"]
 From the repository root:
 
 ```bash
-wolframscript -file build.wls       # docs/*.md -> notebooks, then packs WolframInstitute__Z3Link-*.paclet
-wolframscript -file tools/run_tests.wls   # installs the built paclet and runs the test suite
+wolframscript -file build.wls             # render docs/*.md and pack WolframInstitute__Z3Link-*.paclet
+wolframscript -file tools/run_tests.wls   # install the built paclet and run the test suite
 ```
+
+`build.wls` renders the markdown in `docs/` into the paclet's documentation notebooks with [MarkdownToNotebook](https://github.com/sw1sh/MarkdownToNotebook) (which needs Wolfram Cloud access), then packs the `.paclet`.
+
+---
+
+## Documentation
+
+The paclet ships full documentation: a guide page, reference pages for all 38 symbols, and two tutorials (a feature tour and a constraints walkthrough). After installing, browse it in the Wolfram Documentation Center, or read it on the [Paclet Repository page](https://www.wolframcloud.com/obj/resourcesystem/published/PacletRepository/resources/WolframInstitute/Z3Link/).
 
 ---
 
@@ -51,7 +69,7 @@ On first use the paclet resolves a working `z3` executable in this order:
 1. An executable set explicitly via `Z3SetExecutable["..."]`.
 2. The system `PATH` (and common locations such as `/usr/bin`, `/usr/local/bin`, `/opt/homebrew/bin`).
 3. A copy previously downloaded by the paclet.
-4. **Automatic download** — the correct Z3 release for your platform (Windows / Linux / macOS, x86-64 / arm64) is fetched over HTTPS from the official GitHub releases, then verified by actually running it (`z3 --version`), and cached under `$UserBaseDirectory`. This happens **on every platform** as a guaranteed fallback, with a one-time progress message. On Unix the executable bit is set after extraction; on macOS the quarantine attribute is cleared and the binary + `libz3.dylib` are ad-hoc code-signed (`codesign -s -`) so Apple Silicon will run them. If anything fails, a specific diagnostic message points you to `Z3SetExecutable["..."]`.
+4. **Automatic download** - the correct Z3 release for your platform (Windows / Linux / macOS, x86-64 / arm64) is fetched over HTTPS from the official GitHub releases, then verified by actually running it (`z3 --version`), and cached under `$UserBaseDirectory`. This happens **on every platform** as a guaranteed fallback, with a one-time progress message. On Unix the executable bit is set after extraction; on macOS the quarantine attribute is cleared and the binary + `libz3.dylib` are ad-hoc code-signed (`codesign -s -`) so Apple Silicon will run them. If anything fails, a specific diagnostic message points you to `Z3SetExecutable["..."]`.
 
 ```wl
 Z3InstallationLocation[]   (* resolve (and download if needed) the z3 path *)
@@ -70,7 +88,7 @@ The download is cross-platform: it detects `$SystemID` and selects the matching 
 Needs["WolframInstitute`Z3Link`"]
 
 Z3Solve[x > 2 && y < 10 && x + 2 y == 7, {x, y} \[Element] Integers]
-(*  <| x -> 7, y -> 0 |>  *)
+(*  <| y -> 0, x -> 7 |>  *)
 ```
 
 `Z3Solve` returns an association `variable -> value` when satisfiable, the symbol `Unsatisfiable` when not, and `Indeterminate` when z3 cannot decide.
@@ -79,7 +97,7 @@ Z3Solve[x > 2 && y < 10 && x + 2 y == 7, {x, y} \[Element] Integers]
 
 ## Two input styles
 
-### Style 1 — native expressions + domain (like `Solve`)
+### Style 1 - native expressions + domain (like `Solve`)
 
 Variables are plain symbols; the second argument declares their domain (`Integers`, `Reals`, `Booleans`).
 
@@ -87,7 +105,7 @@ Variables are plain symbols; the second argument declares their domain (`Integer
 Z3Solve[a || b && ! c, {a, b, c} \[Element] Booleans]
 ```
 
-### Style 2 — typed handles (like z3py)
+### Style 2 - typed handles (like z3py)
 
 ```wl
 x = Z3Int["x"]; y = Z3Int["y"];
@@ -118,7 +136,7 @@ Rationals come back exact; nonlinear-real solutions come back as exact algebraic
 | Bit-vectors | `a = Z3BitVec["a",8]; Z3Solve[{a == Z3BitVecVal[10,8] + Z3BitVecVal[5,8]}]` |
 | Arrays | `m = Z3Array["m","Int","Int"]; Z3Solve[{Z3Select[m,2] == 9}]` |
 | Uninterpreted functions | `f = Z3Function["f",{"Int"},"Int"]; Z3Solve[{f[0]==5, f[1]==7}]` |
-| Quantifiers | `Z3ProvableQ[ForAll[x \[Element] Integers, x^2 >= 0], {}]` |
+| Quantifiers | `Z3ProvableQ[Z3ForAll[x \[Element] Integers, x^2 >= 0], {}]` |
 
 Arithmetic helpers translated to SMT: `Plus Times Power Subtract Divide Mod Quotient Abs Min Max Floor Ceiling Boole`. Logic: `And Or Not Implies Xor Equivalent Nand Nor If`. Relations: `Equal Unequal Less Greater LessEqual GreaterEqual` (including chained inequalities). Array terms: `Z3Select`, `Z3Store`.
 
@@ -174,19 +192,19 @@ Z3CheckSat[o]; Z3Model[o]
 
 `Z3Solve` and `Z3Optimize`:
 
-- `"Timeout" -> ms` — per-solve timeout (milliseconds).
-- `"Numeric" -> True` — machine-precision numbers instead of exact.
-- `"Options" -> {"name" -> value, ...}` — arbitrary z3 options.
+- `"Timeout" -> ms` - per-solve timeout (milliseconds).
+- `"Numeric" -> True` - machine-precision numbers instead of exact.
+- `"Options" -> {"name" -> value, ...}` - arbitrary z3 options.
 
 `Z3SetOption[solver, "name" -> value]` sets any z3 option on a live solver; `Z3SetOption["name" -> value]` sets a global default applied to every subsequent solve.
 
 ## Full coverage / advanced features
 
-The wrapped functions cover the common workflow, and three escape hatches reach **everything else z3 can do** — no feature is locked out:
+The wrapped functions cover the common workflow, and three escape hatches reach **everything else z3 can do** - no feature is locked out:
 
-- **Any z3 option** → `Z3SetOption[...]` or the `"Options"` option (e.g. random seeds, `:smt.arith.solver`, `:sat.restart`, model/proof production).
-- **Any SMT operator** → `Z3Op["op", args...]` builds an arbitrary SMT-LIB term (e.g. `Z3Op["bvashr", a, b]`, `Z3Op["str.++", s, t]`, `Z3Op["re.union", r1, r2]`).
-- **Any z3 command** → `Z3RunSMTLIB["..."]` runs raw SMT-LIB2, which exposes tactics (`(check-sat-using (then simplify smt))`), proofs (`(get-proof)`), soft constraints / MaxSAT (`(assert-soft ...)`), interpolation, datatypes, `(simplify ...)`, and the full optimization command set.
+- **Any z3 option** -> `Z3SetOption[...]` or the `"Options"` option (e.g. random seeds, `:smt.arith.solver`, `:sat.restart`, model/proof production).
+- **Any SMT operator** -> `Z3Op["op", args...]` builds an arbitrary SMT-LIB term (e.g. `Z3Op["bvashr", a, b]`, `Z3Op["str.++", s, t]`, `Z3Op["re.union", r1, r2]`).
+- **Any z3 command** -> `Z3RunSMTLIB["..."]` runs raw SMT-LIB2, which exposes tactics (`(check-sat-using (then simplify smt))`), proofs (`(get-proof)`), soft constraints / MaxSAT (`(assert-soft ...)`), interpolation, datatypes, `(simplify ...)`, and the full optimization command set.
 
 So the native and handle APIs are conveniences over the same surface; the raw path guarantees parity with the `z3` binary itself.
 
@@ -196,7 +214,7 @@ So the native and handle APIs are conveniences over the same surface; the raw pa
 
 | Function | Purpose |
 |---|---|
-| `Z3Solve[constraints, domain]` | one-shot solve → model / `Unsatisfiable` / `Indeterminate` |
+| `Z3Solve[constraints, domain]` | one-shot solve -> model / `Unsatisfiable` / `Indeterminate` |
 | `Z3Solve["smtlib2..."]` | run a raw SMT-LIB2 script |
 | `Z3SatisfiableQ`, `Z3ProvableQ` | satisfiability / validity predicates |
 | `Z3ToSMTLIB`, `Z3RunSMTLIB` | SMT-LIB2 export / run |
@@ -226,13 +244,13 @@ Z3Solve / handles / SMT-LIB
 
 Kernel sources:
 
-- `Kernel/Discovery.wl` — locate / auto-download z3 per platform.
-- `Kernel/Process.wl` — persistent process + sentinel framing.
-- `Kernel/SExpr.wl` — S-expression reader.
-- `Kernel/InputTranslate.wl` — Wolfram → SMT-LIB2.
-- `Kernel/OutputTranslate.wl` — z3 results → exact Wolfram values.
-- `Kernel/Handles.wl` — typed handles + operator overloading.
-- `Kernel/API.wl` — public functions.
+- `Kernel/Discovery.wl` - locate / auto-download z3 per platform.
+- `Kernel/Process.wl` - persistent process + sentinel framing.
+- `Kernel/SExpr.wl` - S-expression reader.
+- `Kernel/InputTranslate.wl` - Wolfram -> SMT-LIB2.
+- `Kernel/OutputTranslate.wl` - z3 results -> exact Wolfram values.
+- `Kernel/Handles.wl` - typed handles + operator overloading.
+- `Kernel/API.wl` - public functions.
 
 ---
 
@@ -240,7 +258,7 @@ Kernel sources:
 
 The bindings are pure Wolfram + the `z3` executable, so they run anywhere a Wolfram kernel and z3 run: **Windows, Linux, macOS, and WSL**. The kernel and z3 must be the same OS (e.g. a Windows kernel uses a Windows z3); the auto-downloader always fetches the matching build, so this is handled for you. The paclet detects `$SystemID` (`Windows-x86-64`, `Windows-ARM64`, `Linux-x86-64`, `Linux-ARM64`, `MacOSX-x86-64`, `MacOSX-ARM64`) and behaves accordingly. The exact per-platform download URLs are pinned to verified release-asset names (so resolution doesn't depend on the GitHub API), and on macOS the downloaded binary is automatically un-quarantined and ad-hoc code-signed so Apple Silicon will run it.
 
-> Note on testing: this paclet's automated suite has been exercised on Windows (x86-64). The Linux and macOS code paths — system discovery, the per-platform download, and the macOS permission/signing steps — are written from verified release-asset URLs and documented platform behavior, but have not been executed on those OSes here. On any failure they emit a specific, actionable message (pointing to `Z3SetExecutable[...]`) rather than failing silently.
+> Note on testing: this paclet's automated suite has been exercised on Windows (x86-64). The Linux and macOS code paths - system discovery, the per-platform download, and the macOS permission/signing steps - are written from verified release-asset URLs and documented platform behavior, but have not been executed on those OSes here. On any failure they emit a specific, actionable message (pointing to `Z3SetExecutable[...]`) rather than failing silently.
 
 ---
 
@@ -256,7 +274,7 @@ This installs the built `.paclet` and runs `Z3Link/Tests/Tests.wlt` (translation
 
 ## License
 
-This paclet is free software, licensed under the **GNU General Public License v3.0 or later** — see [LICENSE](LICENSE). You may redistribute and/or modify it under those terms; it comes with no warranty.
+This paclet is free software, licensed under the **GNU General Public License v3.0 or later** - see [LICENSE](LICENSE). You may redistribute and/or modify it under those terms; it comes with no warranty.
 
 ## Credits
 
