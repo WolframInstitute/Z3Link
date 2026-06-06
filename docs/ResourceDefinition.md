@@ -121,32 +121,10 @@ Z3RunSMTLIB["(declare-const a Int)(assert (> a 41))(assert (< a 43))(check-sat)(
 
 ## Hero Image
 
-A small integer program - the points satisfying `x + 2 y == 7` with `x > 2` -
-and the satisfying assignment `{x, y} = {7, 0}` that Z3 returns:
+The Wolfram Spikey wreathed in logical and SMT-LIB glyphs over a constraint-solver search tree, where symbolic computation meets automated reasoning, loaded from the paclet's bundled asset:
 
 ```wl
-With[
-  {sols = Select[Tuples[{Range[3, 9], Range[-1, 3]}], #[[1]] + 2 #[[2]] == 7 &],
-   answer = {7, 0}},
-  Rasterize[
-    Framed[
-      Column[
-        {Style["Z3Link", 38, Bold, GrayLevel[0.12], FontFamily -> "Helvetica"],
-         Style["Bindings to the Z3 SMT solver", 15, GrayLevel[0.45], FontFamily -> "Helvetica"],
-         Spacer[14],
-         Graphics[
-           {GrayLevel[0.82], Thick, InfiniteLine[{{7, 0}, {5, 1}}],
-            RGBColor[0.27, 0.5, 0.72], PointSize[0.045], Point[sols],
-            RGBColor[0.86, 0.32, 0.27], PointSize[0.08], Point[answer],
-            Black, Text[Style["x + 2y = 7", 14, FontFamily -> "Helvetica"], {6.2, 2.4}],
-            RGBColor[0.86, 0.32, 0.27],
-            Text[Style["{x,y} = {7,0}", 13, Bold, FontFamily -> "Helvetica"], {7, -1.1}]},
-           Axes -> True, AxesStyle -> GrayLevel[0.6], Frame -> False,
-           PlotRange -> {{2, 10}, {-1.6, 3.2}}, ImageSize -> 360, AspectRatio -> 0.62]},
-        Alignment -> Center, Spacings -> 0.6],
-      Background -> GrayLevel[0.98], FrameMargins -> 32,
-      FrameStyle -> GrayLevel[0.9], RoundingRadius -> 16],
-    ImageResolution -> 144, Background -> None]]
+Import[FileNameJoin[{PacletObject["WolframInstitute/Z3Link"]["Location"], "Assets", "z3link_spikey.png"}]]
 ```
 
 ## Author Notes
