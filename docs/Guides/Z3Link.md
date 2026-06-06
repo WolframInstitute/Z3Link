@@ -15,45 +15,43 @@ Links: ["[Z3 theorem prover](https://github.com/Z3Prover/z3)", "[SMT-LIB standar
 
 Z3Link brings the [Z3 theorem prover](https://github.com/Z3Prover/z3) - an SMT (Satisfiability Modulo Theories) solver from Microsoft Research - to the Wolfram Language. You state a problem either as ordinary Wolfram expressions with a variable domain (the [Reduce]() idiom) or as typed handles in the style of Z3's Python bindings, and Z3Link translates the answer back into exact Wolfram values: [Integer]() and [Rational]() solutions, algebraic numbers as [Root]() or [Sqrt]() objects, [Boolean]() assignments, bit-vectors, arrays as callable functions, and uninterpreted-function models. It covers linear and nonlinear arithmetic over [Integers]() and [Reals](), bit-vectors, arrays, uninterpreted functions, quantifiers, and optimization, and it exposes raw SMT-LIB2 in both directions. The `z3` executable is located on your system or downloaded automatically on first use, so nothing needs to be installed by hand.
 
-## One-shot solving
+## Functions
 
-- `Z3Solve` solves constraints over a declared domain, returning a variable->value association, `Unsatisfiable`, or `Indeterminate`
-- `Z3SatisfiableQ` tests whether constraints have a solution
-- `Z3ProvableQ` tests whether a claim holds for all values of its variables
-- `Z3Optimize` solves a constrained maximization or minimization in one call
-
-## Incremental solvers
-
-- `Z3CreateSolver` creates a live `Z3SolverObject` (a solver or optimizer) with a push/pop assertion stack
-- `Z3SolverObject` is the handle to a running z3 process
-- `Z3Assert` adds constraints to a solver, declaring any new variables
-- `Z3CheckSat` checks satisfiability of the current assertions
-- `Z3Model` returns the model from the last successful check
-- `Z3Eval` evaluates an expression in the current model
-- `Z3Push` saves the current assertion scope; `Z3Pop` restores it
-- `Z3Reset` clears all assertions and declarations
-- `Z3Maximize` and `Z3Minimize` add objectives to an optimizer
-- `Z3UnsatCore` returns a conflicting subset of assertions after an unsat result
-- `Z3Statistics` returns solver performance statistics
-
-## Typed handles
-
-- `Z3Int`, `Z3Real`, `Z3Bool` are integer-, real-, and boolean-sorted variable handles
-- `Z3BitVec` is an *n*-bit bit-vector handle; `Z3BitVecVal` is a bit-vector literal
-- `Z3Array` is an array-sorted handle; `Z3Select` and `Z3Store` read and update arrays
-- `Z3Function` declares an uninterpreted function; `Z3Const` is a handle of an arbitrary sort
-- `Z3Op` builds an arbitrary SMT-LIB operator term as an escape hatch
-- `Z3ForAll` and `Z3Exists` are message-free quantified formulas
-
-## SMT-LIB interoperation
-
-- `Z3ToSMTLIB` shows the SMT-LIB2 script a native problem compiles to
-- `Z3RunSMTLIB` runs a raw SMT-LIB2 script (string or `File`) and returns its responses
-- `Z3SetOption` sets z3 options on a solver or as global defaults
-
-## Installation and discovery
-
-- `Z3InstallationLocation` resolves (locating or downloading) the z3 executable in use
-- `Z3Version` reports the version of that executable
-- `Z3Install` forces a fresh download of z3 for this platform
-- `Z3SetExecutable` pins a specific z3 binary
+- `Z3Solve` solve a constraint system, returning a model, `Unsatisfiable`, or `Indeterminate`
+- `Z3SatisfiableQ` test whether constraints are satisfiable
+- `Z3ProvableQ` test whether a claim holds for all values of its variables
+- `Z3Optimize` solve a constrained maximization or minimization in one call
+- `Z3CreateSolver` create an incremental solver or optimizer object
+- `Z3SolverObject` a live incremental z3 solver or optimizer instance
+- `Z3Assert` add constraints to a solver, declaring any new variables
+- `Z3CheckSat` check satisfiability of a solver's current assertions
+- `Z3Model` the model from a solver's last successful check
+- `Z3Eval` evaluate an expression in a solver's current model
+- `Z3Push` save a solver's current assertion scope
+- `Z3Pop` restore the most recently pushed scope
+- `Z3Reset` clear all assertions and declarations from a solver
+- `Z3UnsatCore` a conflicting subset of assertions after an unsat result
+- `Z3Statistics` z3 solver performance statistics
+- `Z3Maximize` add a maximization objective to an optimizer
+- `Z3Minimize` add a minimization objective to an optimizer
+- `Z3Int` an integer-sorted variable handle
+- `Z3Real` a real-sorted variable handle
+- `Z3Bool` a boolean-sorted variable handle
+- `Z3Const` a variable handle of an arbitrary sort
+- `Z3BitVec` an *n*-bit bit-vector variable handle
+- `Z3BitVecVal` an *n*-bit bit-vector literal
+- `Z3Array` an array-sorted variable handle
+- `Z3Function` an uninterpreted function handle
+- `Z3Select` read an array entry
+- `Z3Store` an array with one entry updated
+- `Z3Op` build an arbitrary SMT-LIB operator term
+- `Z3ForAll` a universally quantified formula
+- `Z3Exists` an existentially quantified formula
+- `Z3ToSMTLIB` the SMT-LIB2 script a native problem compiles to
+- `Z3RunSMTLIB` run a raw SMT-LIB2 script and return its responses
+- `Z3SetOption` set z3 options on a solver or as global defaults
+- `Z3InstallationLocation` locate (or download) the z3 executable in use
+- `Z3Version` the version of the z3 executable in use
+- `Z3Install` download a private copy of z3 for this platform
+- `Z3SetExecutable` pin a specific z3 binary
+- `Unsatisfiable` the symbol `Z3Solve` returns when there is no solution
