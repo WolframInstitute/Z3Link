@@ -4,7 +4,11 @@
    Operator UpValues build compound Z3Expr nodes, mirroring z3py operator overloading.
    Z3Expr[smt, sort, decls]: decls maps name -> declaration entry (see InputTranslate). *)
 
-mergeDecls[args_List] := With[{ds = Cases[args, Z3Expr[_, _, d_] :> d]},
+(* Collect declarations from handles at ANY depth: operands may be native Plus/
+   Times nodes (Orderless operators are not eagerly overloaded) with handles
+   nested inside, whose SMT is emitted by toSMT but whose declarations would
+   otherwise be missed by a level-1 scan. *)
+mergeDecls[args_List] := With[{ds = Cases[args, Z3Expr[_, _, d_] :> d, Infinity]},
   If[ds === {}, <||>, Join @@ ds]];
 
 funDeclEntry[name_String, argS_List, ret_String] := <|
