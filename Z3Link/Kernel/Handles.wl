@@ -74,8 +74,16 @@ z3bool[op_String, args_List] := Z3Expr[
 z3pow[x_Z3Expr, n_Integer] := Z3Expr[powSMT[x[[1]], n], x[[2]], x[[3]]];
 z3pow[x_Z3Expr, n_] := Z3Expr["(^ " <> x[[1]] <> " " <> toSMT[n] <> ")", x[[2]], x[[3]]];
 
-Z3Expr /: Plus[a___, x_Z3Expr, b___] := z3arith[Plus, {a, x, b}];
-Z3Expr /: Times[a___, x_Z3Expr, b___] := z3arith[Times, {a, x, b}];
+(* Plus/Times are Orderless: an UpValue pattern that anchors one handle among the
+   args (a___, x_Z3Expr, b___) forces the Orderless matcher to enumerate how the
+   other terms split across the two sequence blanks -- 2^n when many args are
+   handles, e.g. an objective Total[handles]. We do NOT overload them eagerly.
+   A sum/product of handles stays a native Plus/Times node (with the handles
+   nested) and is converted at compile time by toSMT, which matches by head and
+   walks the args once (linear) and whose collectHandleDecls pass picks up the
+   nested handles' declarations. Ordered operators below stay eager: their
+   a___,x,b___ matching is linear, and they are what turn an expression into an
+   asserted constraint. *)
 Z3Expr /: Power[x_Z3Expr, n_] := z3pow[x, n];
 
 Z3Expr /: Equal[a___, x_Z3Expr, b___] := z3bool["=", {a, x, b}];
@@ -90,7 +98,7 @@ Z3Expr /: Or[a___, x_Z3Expr, b___] := z3bool["or", {a, x, b}];
 Z3Expr /: Not[x_Z3Expr] := z3bool["not", {x}];
 Z3Expr /: Implies[x_Z3Expr, b_] := z3bool["=>", {x, b}];
 Z3Expr /: Implies[a_, x_Z3Expr] := z3bool["=>", {a, x}];
-Z3Expr /: Xor[a___, x_Z3Expr, b___] := z3bool["xor", {a, x, b}];
+(* Xor is Orderless too -- not overloaded eagerly; compiled by toSMT (see Plus/Times). *)
 
 (* readable display *)
 Z3Expr /: MakeBoxes[Z3Expr[s_String, sort_, d_], form : (StandardForm | TraditionalForm)] :=
