@@ -49,6 +49,28 @@ VerificationTest[
   15, TestID -> "bitvec-add"
 ];
 
+VerificationTest[
+  Lookup[Z3Solve[{Z3BitVec["a", 8] == Z3BitVecVal[3, 8]*Z3BitVecVal[4, 8]}], "a"],
+  12, TestID -> "bitvec-mul"
+];
+
+VerificationTest[
+  Lookup[Z3Solve[{Z3BitVec["a", 8] == Z3BitVecVal[20, 8] - Z3BitVecVal[5, 8]}], "a"],
+  15, TestID -> "bitvec-sub"
+];
+
+(* Plus/Times of bit-vector handles must compile to bvadd/bvmul, not +/* -- the
+   Orderless operators are no longer overloaded eagerly, so toSMT picks the op. *)
+VerificationTest[
+  StringContainsQ[Z3ToSMTLIB[{Z3BitVec["a", 8] == Z3BitVecVal[10, 8] + Z3BitVecVal[5, 8]}, Automatic], "(bvadd"],
+  True, TestID -> "bitvec-add-smt"
+];
+
+VerificationTest[
+  StringContainsQ[Z3ToSMTLIB[{Z3BitVec["a", 8] == Z3BitVecVal[3, 8]*Z3BitVecVal[4, 8]}, Automatic], "(bvmul"],
+  True, TestID -> "bitvec-mul-smt"
+];
+
 (* ---- arrays ---- *)
 
 VerificationTest[
@@ -234,5 +256,43 @@ VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "MacOSX-x8
 VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "Windows-x86-64"],
   "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3-4.16.0-x64-win.zip", TestID -> "mock-url-win"];
 VerificationTest[WolframInstitute`Z3Link`Private`z3AssetURL["4.16.0", "Plan9-x86"], $Failed, TestID -> "mock-url-unknown"];
+
+(* ---- handle arithmetic through native Orderless nodes: Plus/Times/Xor are not
+   overloaded eagerly, so a sum/product of handles stays a native node compiled
+   by toSMT, with declarations collected from handles nested at any depth ---- *)
+
+VerificationTest[
+  Module[{x = Z3Int["x"], y = Z3Int["y"], z = Z3Int["z"]},
+    Lookup[Z3Solve[{x + y + z == 6, x == 1, y == 2}], "z"]],
+  3, TestID -> "handle-sum"
+];
+
+VerificationTest[
+  Module[{v = Z3Int /@ {"a", "b", "c"}},
+    Lookup[Z3Solve[{Total[v] == 10, v[[1]] == 2, v[[2]] == 3}], "c"]],
+  5, TestID -> "handle-total"
+];
+
+VerificationTest[
+  Module[{x = Z3Int["x"], y = Z3Int["y"], o = Z3CreateSolver["Optimize"]},
+    Z3Assert[o, x + y == 10 && x >= 0 && y >= 0];
+    Z3Maximize[o, x*x + y*y];
+    Z3CheckSat[o];
+    Sort[Values[Z3Model[o]]]],
+  {0, 10}, TestID -> "handle-nested-objective"
+];
+
+(* ---- Xor (Orderless, compiled by toSMT) ---- *)
+
+VerificationTest[
+  Module[{p = Z3Bool["p"], q = Z3Bool["q"]},
+    Sort[Values[Z3Solve[{Xor[p, q], p}]]]],
+  {False, True}, TestID -> "xor-handles"
+];
+
+VerificationTest[
+  StringContainsQ[Z3ToSMTLIB[Xor[p, q] && p, {p, q} \[Element] Booleans], "(xor"],
+  True, TestID -> "translate-xor"
+];
 
 EndTestSection[];

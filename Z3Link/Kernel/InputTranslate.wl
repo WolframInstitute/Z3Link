@@ -62,10 +62,22 @@ toSMT[False] := "false";
    And[a__], Nand[a__] etc. auto-evaluate at definition time (OneIdentity / single-arg
    rules: Plus[x]->x, Equal[x]->True), which silently corrupts the DownValue. *)
 
-toSMT[e_Plus] := nary["+", List @@ e];
+(* Plus/Times are not overloaded on handles (Orderless), so a sum/product of
+   bit-vector handles arrives here as a native Plus/Times node. Pick the
+   bit-vector ops (bvadd/bvmul/bvneg) when any operand is BitVec-sorted, the
+   arithmetic ops (+/*/-) otherwise -- matching z3arith's eager handle path. *)
+toSMT[e_Plus] := With[{args = List @@ e},
+  nary[If[anyBVQ[args], "bvadd", "+"], args]
+];
 
 toSMT[e_Times] := Module[{args = List @@ e},
   Which[
+    anyBVQ[args],
+      Which[
+        MatchQ[args, {-1, _}], "(bvneg " <> toSMT[args[[2]]] <> ")",
+        MatchQ[args, {-1, __}], "(bvneg " <> nary["bvmul", Rest[args]] <> ")",
+        True, nary["bvmul", args]
+      ],
     MatchQ[args, {-1, _}], "(- " <> toSMT[args[[2]]] <> ")",
     MatchQ[args, {-1, __}], "(- (* " <> StringRiffle[toSMT /@ Rest[args], " "] <> "))",
     True, nary["*", args]

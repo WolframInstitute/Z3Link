@@ -7,7 +7,7 @@ PacletObject[
     "Creator" -> "Richard Assar",
     "License" -> "GPL-3.0-or-later",
     "PublisherID" -> "WolframInstitute",
-    "Version" -> "1.0.1",
+    "Version" -> "1.0.2",
     "WolframVersion" -> "13.0+",
     "PrimaryContext" -> "WolframInstitute`Z3Link`",
     "Categories" -> {"Mathematics", "Logic"},
